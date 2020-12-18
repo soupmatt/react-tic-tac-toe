@@ -3,8 +3,11 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 
-interface SquareProps { onClick: () => any, value: string|null }
-type Squares = (string|null)[]
+interface SquareProps {
+  onClick: () => any;
+  value: string | null;
+}
+type Squares = (string | null)[];
 
 const Square: React.FunctionComponent<SquareProps> = (props: SquareProps) => {
   return (
@@ -12,9 +15,12 @@ const Square: React.FunctionComponent<SquareProps> = (props: SquareProps) => {
       {props.value}
     </button>
   );
-}
+};
 
-interface BoardProps { squares: Squares, onClick: (i: number) => void }
+interface BoardProps {
+  squares: Squares;
+  onClick: (i: number) => void;
+}
 
 class Board extends React.Component<BoardProps> {
   renderSquare(i: number) {
@@ -50,10 +56,10 @@ class Board extends React.Component<BoardProps> {
 }
 
 type GameState = {
-  history: { squares: Squares, moveLocation: number|null }[];
+  history: { squares: Squares; moveLocation: number | null }[];
   stepNumber: number;
   xIsNext: boolean;
-}
+};
 
 class Game extends React.Component<{}, GameState> {
   constructor(props: {}) {
@@ -61,8 +67,8 @@ class Game extends React.Component<{}, GameState> {
     this.state = {
       history: [
         {
-          squares: (Array(9)).fill(null),
-          moveLocation: null
+          squares: Array(9).fill(null),
+          moveLocation: null,
         },
       ],
       stepNumber: 0,
@@ -82,7 +88,7 @@ class Game extends React.Component<{}, GameState> {
       history: history.concat([
         {
           squares,
-          moveLocation: i
+          moveLocation: i,
         },
       ]),
       stepNumber: history.length,
@@ -111,12 +117,18 @@ class Game extends React.Component<{}, GameState> {
         >
           <button onClick={() => this.jumpTo(move)}>
             <span
-              className={move === this.state.stepNumber ? "selected" : undefined}
+              className={
+                move === this.state.stepNumber ? "selected" : undefined
+              }
             >
               {desc}
             </span>
           </button>
-          {step.moveLocation === null ? "" : ` - (${Math.floor(step.moveLocation / 3) + 1}, ${(step.moveLocation % 3)+1})`}
+          {step.moveLocation === null
+            ? ""
+            : ` - (${Math.floor(step.moveLocation / 3) + 1}, ${
+                (step.moveLocation % 3) + 1
+              })`}
         </li>
       );
     });
