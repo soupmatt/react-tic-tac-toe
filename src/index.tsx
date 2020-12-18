@@ -3,7 +3,10 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 
-function Square(props) {
+interface SquareProps { onClick: () => any, value: string|null }
+type Squares = (string|null)[]
+
+const Square: React.FunctionComponent<SquareProps> = (props: SquareProps) => {
   return (
     <button className="square" onClick={props.onClick}>
       {props.value}
@@ -11,8 +14,10 @@ function Square(props) {
   );
 }
 
-class Board extends React.Component {
-  renderSquare(i) {
+interface BoardProps { squares: Squares, onClick: (i: number) => void }
+
+class Board extends React.Component<BoardProps> {
+  renderSquare(i: number) {
     return (
       <Square
         value={this.props.squares[i]}
@@ -44,13 +49,19 @@ class Board extends React.Component {
   }
 }
 
-class Game extends React.Component {
-  constructor(props) {
+type GameState = {
+  history: { squares: Squares }[];
+  stepNumber: number;
+  xIsNext: boolean;
+}
+
+class Game extends React.Component<{}, GameState> {
+  constructor(props: {}) {
     super(props);
     this.state = {
       history: [
         {
-          squares: Array(9).fill(null),
+          squares: (Array(9)).fill(null),
         },
       ],
       stepNumber: 0,
@@ -58,7 +69,7 @@ class Game extends React.Component {
     };
   }
 
-  handleClick(i) {
+  handleClick(i: number) {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
@@ -77,7 +88,7 @@ class Game extends React.Component {
     });
   }
 
-  jumpTo(step) {
+  jumpTo(step: number) {
     this.setState({
       stepNumber: step,
       xIsNext: step % 2 === 0,
@@ -94,11 +105,11 @@ class Game extends React.Component {
       return (
         <li
           key={move}
-          className={move === this.state.stepNumber ? "selected" : null}
+          className={move === this.state.stepNumber ? "selected" : undefined}
         >
           <button onClick={() => this.jumpTo(move)}>
             <span
-              className={move === this.state.stepNumber ? "selected" : null}
+              className={move === this.state.stepNumber ? "selected" : undefined}
             >
               {desc}
             </span>
@@ -135,7 +146,7 @@ class Game extends React.Component {
   }
 }
 
-function calculateWinner(squares) {
+function calculateWinner(squares: Squares) {
   const lines = [
     [0, 1, 2],
     [3, 4, 5],
