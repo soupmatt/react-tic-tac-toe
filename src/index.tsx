@@ -45,10 +45,52 @@ class Board extends React.Component<BoardProps> {
   }
 }
 
+const MoveList: React.FunctionComponent<{
+  history: HistEntry[];
+  historySortReversed: boolean;
+  buttonClickFn: (move: number) => void;
+  stepNumber: number | undefined;
+}> = (props) => {
+  const moves = props.history.map((step: HistEntry, move: number) => {
+    const desc = move ? `Go to move #${move}` : "Go to game start";
+    return (
+      <li
+        key={move}
+        className={move === props.stepNumber ? "selected" : undefined}
+      >
+        <button onClick={() => props.buttonClickFn(move)}>
+          <span className={move === props.stepNumber ? "selected" : undefined}>
+            {desc}
+          </span>
+        </button>
+        {step.moveLocation === null
+          ? ""
+          : ` - (${Math.floor(step.moveLocation / 3) + 1}, ${
+              (step.moveLocation % 3) + 1
+            })`}
+      </li>
+    );
+  });
+
+  if (props.historySortReversed) moves.reverse();
+
+  return (
+    <ol reversed={props.historySortReversed} className="moves">
+      {moves}
+    </ol>
+  );
+};
+
+type HistEntry = {
+  squares: Squares;
+  moveLocation: number | null;
+};
+
 type GameState = {
-  history: { squares: Squares; moveLocation: number | null }[];
+  history: HistEntry[];
   stepNumber: number;
   xIsNext: boolean;
+  historySortReversed: boolean;
 };
 
 class Game extends React.Component<{}, GameState> {
@@ -63,6 +105,7 @@ class Game extends React.Component<{}, GameState> {
       ],
       stepNumber: 0,
       xIsNext: true,
+      historySortReversed: false,
     };
   }
 
@@ -93,35 +136,16 @@ class Game extends React.Component<{}, GameState> {
     });
   }
 
+  toggleHistorySort() {
+    this.setState({
+      historySortReversed: !this.state.historySortReversed,
+    });
+  }
+
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
-
-    const moves = history.map((step, move: number) => {
-      const desc = move ? `Go to move #${move}` : "Go to game start";
-      return (
-        <li
-          key={move}
-          className={move === this.state.stepNumber ? "selected" : undefined}
-        >
-          <button onClick={() => this.jumpTo(move)}>
-            <span
-              className={
-                move === this.state.stepNumber ? "selected" : undefined
-              }
-            >
-              {desc}
-            </span>
-          </button>
-          {step.moveLocation === null
-            ? ""
-            : ` - (${Math.floor(step.moveLocation / 3) + 1}, ${
-                (step.moveLocation % 3) + 1
-              })`}
-        </li>
-      );
-    });
 
     let status;
     if (winner) {
@@ -144,7 +168,17 @@ class Game extends React.Component<{}, GameState> {
         </div>
         <div className="game-info">
           <div>{status}</div>
-          <ol className="moves">{moves}</ol>
+          <div>
+            <button onClick={() => this.toggleHistorySort()}>
+              Reverse History Sort
+            </button>
+          </div>
+          <MoveList
+            history={this.state.history}
+            historySortReversed={this.state.historySortReversed}
+            buttonClickFn={(step: number) => this.jumpTo(step)}
+            stepNumber={this.state.stepNumber}
+          />
         </div>
       </div>
     );
